@@ -38,6 +38,9 @@ public class CamelFeature implements Feature {
             finder.findImplementations(Producer.class).forEach(this::allowMethods);
             allowInstantiate(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);
             allowMethods(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);
+            allowMethods(org.apache.camel.model.RouteDefinition.class);
+            allowMethods(org.apache.camel.model.FromDefinition.class);
+            allowMethods(org.apache.camel.model.ToDefinition.class);            
         } catch (Throwable t) {
             throw new RuntimeException("Unable to analyse classes", t);
         }
