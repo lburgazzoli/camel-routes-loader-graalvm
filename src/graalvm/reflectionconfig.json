@@ -1,0 +1,3 @@
+[
+  { "name" : "org.apache.camel.graalvm.ScriptedRouteBuilder", "allPublicConstructors" : true }
+]
