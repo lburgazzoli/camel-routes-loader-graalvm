@@ -114,6 +114,7 @@
                             <arguments>
                                 <argument>-cp</argument>
                                 <classpath/>
+                                <argument>--tool:truffle</argument>
                                 <argument>--language:js</argument>
                                 <argument>-H:+JNI</argument>
                                 <argument>-H:ReflectionConfigurationFiles=../src/graalvm/reflectionconfig.json</argument>
