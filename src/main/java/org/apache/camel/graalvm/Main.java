@@ -11,6 +11,7 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.graalvm.polyglot.proxy.ProxyObject;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -27,7 +28,8 @@ public class Main {
         context.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                try(Context ctx = Context.create()) {// add this builder instance to javascript language
+                try(Context ctx = Context.create()) {
+                    // add this builder instance to javascript language
                     // bindings
                     ctx.getBindings("js").putMember("from", new ProxyExecutable() {
                         @Override
@@ -35,8 +37,11 @@ public class Main {
                             if (arguments.length != 1) {
                                 throw new IllegalArgumentException("");
                             }
-
-                            return new RouteDefinition().from(arguments[0].asString());
+                            
+                            final RouteDefinition def = from(arguments[0].asString());
+                            final RouteDefinitionProxy answer = new RouteDefinitionProxy(def);
+                            
+                            return answer;
                         }
                     });
                     
@@ -52,6 +57,46 @@ public class Main {
             latch.await();
         } finally {
             context.stop();
+        }
+    }
+
+    private static class RouteDefinitionProxy implements ProxyObject {
+        private final RouteDefinition rd;
+
+        public RouteDefinitionProxy(RouteDefinition rd) {
+            this.rd = rd;
+        }
+
+        @Override
+        public Object getMember(String key) {
+            if ("to".equals(key)) {
+                return new ProxyExecutable() {
+                    @Override
+                    public Object execute(Value... arguments) {
+                        if (arguments.length != 1) {
+                            throw new IllegalArgumentException("");
+                        }
+
+                        return rd.to(arguments[0].asString());
+                    }
+                };
+            }
+            return null;
+        }
+
+        @Override
+        public Object getMemberKeys() {
+            return new String[] { "to" };
+        }
+
+        @Override
+        public boolean hasMember(String key) {
+            return "to".equals(key);
+        }
+
+        @Override
+        public void putMember(String key, Value value) {
+            throw new UnsupportedOperationException("Unsupported: " + key);
         }
     }
 }
