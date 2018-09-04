@@ -54,32 +54,48 @@ public class Main {
         }
     }
 
-    private static Proxy createRouteDefinitionProxy(RouteDefinition definition) {
+    private static Proxy createRouteDefinitionProxy(RouteDefinition def) {
         Map<String, Object> methods = new HashMap<>();
-        methods.put("to", (ProxyExecutable) arguments -> {
-            if (arguments.length != 1) {
+
+        methods.put("to", (ProxyExecutable) args -> {
+            if (args.length != 1) {
                 throw new IllegalArgumentException("");
             }
 
-            return createRouteDefinitionProxy(definition.to(arguments[0].asString()));
+            // wrap the definition with a new
+            // proxy
+            return createRouteDefinitionProxy(
+                def.to(args[0].asString())
+            );
         });
-        methods.put("setBody", (ProxyExecutable) arguments -> {
-            if (arguments.length != 1) {
+
+        methods.put("setBody", (ProxyExecutable) args -> {
+            if (args.length != 1) {
                 throw new IllegalArgumentException("");
             }
 
-            definition.setBody().constant(arguments[0].asString());
+            // assuming we only use strings in js
+            def.setBody().constant(args[0].asString());
 
-            return createRouteDefinitionProxy(definition);
+            // wrap the definition with a new
+            // proxy
+            return createRouteDefinitionProxy(def);
         });
-        methods.put("setHeader", (ProxyExecutable) arguments -> {
-            if (arguments.length != 2) {
+
+        methods.put("setHeader", (ProxyExecutable) args -> {
+            if (args.length != 2) {
                 throw new IllegalArgumentException("");
             }
 
-            definition.setHeader(arguments[0].asString()).constant(arguments[1].asString());
+            // assuming we only use strings in js
+            final String key = args[0].asString();
+            final String val = args[0].asString();
 
-            return createRouteDefinitionProxy(definition);
+            def.setHeader(key).constant(val);
+
+            // wrap the definition with a new
+            // proxy
+            return createRouteDefinitionProxy(def);
         });
 
         return ProxyObject.fromMap(methods);
