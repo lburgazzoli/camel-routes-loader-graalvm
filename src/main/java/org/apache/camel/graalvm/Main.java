@@ -3,11 +3,10 @@ package org.apache.camel.graalvm;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Endpoint;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.model.RouteDefinition;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
@@ -17,13 +16,8 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        final SimpleRegistry registry = new SimpleRegistry();
-        final CamelContext context = new FastCamelContext(registry);
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(latch::countDown));
-
-        context.addRoutes(new RouteBuilder() {
+        org.apache.camel.main.Main main = new org.apache.camel.main.Main();
+        main.addRouteBuilder(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
                 try(Context ctx = Context.create()) {
@@ -35,6 +29,7 @@ public class Main {
                         }
 
                         return createRouteDefinitionProxy(
+                            getContext(),
                             from(arguments[0].asString())
                         );
                     });
@@ -46,15 +41,10 @@ public class Main {
             }
         });
 
-        try {
-            context.start();
-            latch.await();
-        } finally {
-            context.stop();
-        }
+        main.run();
     }
 
-    private static Proxy createRouteDefinitionProxy(RouteDefinition def) {
+    private static Proxy createRouteDefinitionProxy(CamelContext context, RouteDefinition def) {
         Map<String, Object> methods = new HashMap<>();
 
         methods.put("to", (ProxyExecutable) args -> {
@@ -64,9 +54,7 @@ public class Main {
 
             // wrap the definition with a new
             // proxy
-            return createRouteDefinitionProxy(
-                def.to(args[0].asString())
-            );
+            return createRouteDefinitionProxy(context, def.to(args[0].asString()));
         });
 
         methods.put("setBody", (ProxyExecutable) args -> {
@@ -79,7 +67,7 @@ public class Main {
 
             // wrap the definition with a new
             // proxy
-            return createRouteDefinitionProxy(def);
+            return createRouteDefinitionProxy(context, def);
         });
 
         methods.put("setHeader", (ProxyExecutable) args -> {
@@ -89,13 +77,13 @@ public class Main {
 
             // assuming we only use strings in js
             final String key = args[0].asString();
-            final String val = args[0].asString();
+            final String val = args[1].asString();
 
             def.setHeader(key).constant(val);
 
             // wrap the definition with a new
             // proxy
-            return createRouteDefinitionProxy(def);
+            return createRouteDefinitionProxy(context, def);
         });
 
         return ProxyObject.fromMap(methods);

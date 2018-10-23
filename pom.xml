@@ -17,31 +17,27 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>platforms</artifactId>
-        <version>2.23.0-SNAPSHOT</version>
-    </parent>
-
     <groupId> org.apache.camel</groupId>
     <artifactId>camel-routes-loader-graalvm</artifactId>
+    <version>1.0.0</version>
     <name>camel-routes-loader-graalvm</name>
     <packaging>jar</packaging>
 
     <properties>
         <jdk.version>1.8</jdk.version>
-        <graalvm.version>1.0.0-rc5</graalvm.version>
+        <graalvm.version>1.0.0-rc8</graalvm.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.xml.bind</groupId>
@@ -50,11 +46,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
-            <groupId>org.graalvm</groupId>
+            <groupId>org.graalvm.sdk</groupId>
             <artifactId>graal-sdk</artifactId>
             <version>${graalvm.version}</version>
             <scope>provided</scope>
@@ -96,38 +93,36 @@
                 </executions>
                 <configuration>
                     <toolchains>
-                        <jdk/>
+                        <jdk>
+                            <id>graalvm-1.0.0</id>
+                        </jdk>
                     </toolchains>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
-                    <skip>false</skip>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.oracle.substratevm</groupId>
+                <artifactId>native-image-maven-plugin</artifactId>
+                <version>${graalvm.version}</version>
+                <configuration>
+                    <mainClass>org.apache.camel.graalvm.Main</mainClass>
+                    <buildArgs>
+                        --verbose --language:js -H:+JNI -H:ReflectionConfigurationFiles=../src/graalvm/reflectionconfig.json -H:IncludeResources=META-INF/.* -H:Features=org.apache.camel.graalvm.support.CamelFeature -DCamelSimpleLRUCacheFactory=true
+                    </buildArgs>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>native-image</goal>
                         </goals>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <executable>native-image</executable>
-                            <workingDirectory>${project.build.directory}</workingDirectory>
-                            <arguments>
-                                <argument>-cp</argument>
-                                <classpath/>
-                                <argument>--verbose</argument>
-                                <argument>--language:js</argument>
-                                <argument>-H:+JNI</argument>
-                                <argument>-H:ReflectionConfigurationFiles=../src/graalvm/reflectionconfig.json</argument>
-                                <argument>-H:IncludeResources=META-INF/.*</argument>
-                                <argument>-H:Features=org.apache.camel.graalvm.support.CamelFeature</argument>
-                                <argument>-DCamelSimpleLRUCacheFactory=true</argument>
-                                <argument>org.apache.camel.graalvm.Main</argument>
-                            </arguments>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

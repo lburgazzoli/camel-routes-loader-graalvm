@@ -19,7 +19,7 @@ public class CamelFeature implements Feature {
 
     private static void allowInstantiate(Class cl) {
         RuntimeReflection.register(cl);
-        for (Constructor c : cl.getConstructors()) {
+        for (Constructor<?> c : cl.getConstructors()) {
             RuntimeReflection.register(c);
         }
     }
@@ -56,5 +56,4 @@ public class CamelFeature implements Feature {
             throw new RuntimeException("Unable to analyse classes", t);
         }
     }
-
 }
