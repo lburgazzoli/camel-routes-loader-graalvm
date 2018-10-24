@@ -10,6 +10,7 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Producer;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.spi.DataFormat;
+import org.apache.camel.spi.ExchangeFormatter;
 import org.apache.camel.spi.Language;
 import org.apache.xbean.finder.ClassFinder;
 import org.graalvm.nativeimage.Feature;
@@ -46,6 +47,7 @@ public class CamelFeature implements Feature {
             finder.findImplementations(Producer.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(Endpoint.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ProcessorDefinition.class).forEach(CamelFeature::allowAll);
+            finder.findImplementations(ExchangeFormatter.class).forEach(CamelFeature::allowAll);
 
             allowInstantiate(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);
             allowMethods(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);

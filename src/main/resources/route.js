@@ -1,3 +1,3 @@
-from('timer:js?period=5s')
+from('timer:js?period=1s')
     .setBody('test')
-    .to('log:js')
+    .to('log:js?showAll=false&multiline=false')

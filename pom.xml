@@ -21,7 +21,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId> org.apache.camel</groupId>
+    <groupId>org.apache.camel</groupId>
     <artifactId>camel-routes-loader-graalvm</artifactId>
     <version>1.0.0</version>
     <name>camel-routes-loader-graalvm</name>
@@ -113,7 +113,7 @@
                 <artifactId>native-image-maven-plugin</artifactId>
                 <version>${graalvm.version}</version>
                 <configuration>
-                    <mainClass>org.apache.camel.graalvm.Main</mainClass>
+                    <mainClass>org.apache.camel.graalvm.Application</mainClass>
                     <buildArgs>
                         --verbose --language:js -H:+JNI -H:ReflectionConfigurationFiles=../src/graalvm/reflectionconfig.json -H:IncludeResources=META-INF/.* -H:Features=org.apache.camel.graalvm.support.CamelFeature -DCamelSimpleLRUCacheFactory=true
                     </buildArgs>
