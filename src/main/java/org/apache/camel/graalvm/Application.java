@@ -38,8 +38,6 @@ public class Application {
         @Override
         public void configure() throws Exception {
             try(Context ctx = Context.create()) {
-                // add this builder instance to javascript language
-                // bindings
                 ctx.getBindings("js").putMember("from", (ProxyExecutable) arguments -> {
                     if (arguments.length != 1) {
                         throw new IllegalArgumentException("");
