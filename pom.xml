@@ -94,7 +94,8 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <id>graalvm-1.0.0</id>
+                            <id>graalvm</id>
+                            <version>1.0.0</version>
                         </jdk>
                     </toolchains>
                 </configuration>
