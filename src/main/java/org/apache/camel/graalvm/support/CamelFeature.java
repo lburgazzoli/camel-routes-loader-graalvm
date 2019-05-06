@@ -6,15 +6,28 @@ import java.lang.reflect.Method;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.Consumer;
+import org.apache.camel.Converter;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Producer;
+import org.apache.camel.builder.ExpressionBuilder;
+import org.apache.camel.builder.ExpressionClause;
+import org.apache.camel.component.bean.BeanConverterLoader;
+import org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory;
+import org.apache.camel.model.FromDefinition;
 import org.apache.camel.model.ProcessorDefinition;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.SetBodyDefinition;
+import org.apache.camel.model.SetHeaderDefinition;
+import org.apache.camel.model.ToDefinition;
+import org.apache.camel.model.language.ExpressionDefinition;
+import org.apache.camel.model.language.LanguageExpression;
 import org.apache.camel.spi.DataFormat;
 import org.apache.camel.spi.ExchangeFormatter;
 import org.apache.camel.spi.Language;
+import org.apache.camel.spi.TypeConverterLoader;
 import org.apache.xbean.finder.ClassFinder;
-import org.graalvm.nativeimage.Feature;
-import org.graalvm.nativeimage.RuntimeReflection;
+import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
 public class CamelFeature implements Feature {
 
@@ -48,12 +61,21 @@ public class CamelFeature implements Feature {
             finder.findImplementations(Endpoint.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ProcessorDefinition.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ExchangeFormatter.class).forEach(CamelFeature::allowAll);
+            finder.findImplementations(ExpressionDefinition.class).forEach(CamelFeature::allowAll);
+            finder.findImplementations(TypeConverterLoader.class).forEach(CamelFeature::allowAll);
+            finder.findAnnotatedClasses(Converter.class).forEach(CamelFeature::allowAll);
+            finder.findAnnotatedMethods(Converter.class).forEach(RuntimeReflection::register);
 
-            allowInstantiate(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);
-            allowMethods(org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory.class);
-            allowMethods(org.apache.camel.model.RouteDefinition.class);
-            allowMethods(org.apache.camel.model.FromDefinition.class);
-            allowMethods(org.apache.camel.model.ToDefinition.class);
+            allowAll(GenericFileProcessStrategyFactory.class);
+            allowAll(RouteDefinition.class);
+            allowAll(FromDefinition.class);
+            allowAll(ToDefinition.class);
+            allowAll(SetBodyDefinition.class);
+            allowAll(SetHeaderDefinition.class);
+            allowAll(LanguageExpression.class);
+            allowAll(ExpressionBuilder.class);
+            allowAll(ExpressionClause.class);
+            allowAll(BeanConverterLoader.class);
         } catch (Throwable t) {
             throw new RuntimeException("Unable to analyse classes", t);
         }

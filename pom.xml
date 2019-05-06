@@ -29,7 +29,7 @@
 
     <properties>
         <jdk.version>1.8</jdk.version>
-        <graalvm.version>1.0.0-rc8</graalvm.version>
+        <graalvm.version>1.0.0-rc16</graalvm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -37,11 +37,47 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>3.0.0-M2</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-direct</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-directvm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-rest</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-saga</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-xslt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-stub</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-controlbus</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-browse</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-vm</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -116,7 +152,7 @@
                 <configuration>
                     <mainClass>org.apache.camel.graalvm.Application</mainClass>
                     <buildArgs>
-                        --verbose --language:js -H:+JNI -H:ReflectionConfigurationFiles=../src/graalvm/reflectionconfig.json -H:IncludeResources=META-INF/.* -H:Features=org.apache.camel.graalvm.support.CamelFeature -DCamelSimpleLRUCacheFactory=true
+                        --verbose --no-server --language:js -J-Xmx10G -H:ReflectionConfigurationFiles=${project.basedir}/src/graalvm/reflection.json -H:DynamicProxyConfigurationFiles=${project.basedir}/src/graalvm/proxy.json -H:IncludeResources=META-INF/.* -H:Features=org.apache.camel.graalvm.support.CamelFeature -DCamelSimpleLRUCacheFactory=true
                     </buildArgs>
                 </configuration>
                 <executions>
