@@ -8,11 +8,13 @@ import org.apache.camel.Component;
 import org.apache.camel.Consumer;
 import org.apache.camel.Converter;
 import org.apache.camel.Endpoint;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Producer;
 import org.apache.camel.builder.ExpressionBuilder;
 import org.apache.camel.builder.ExpressionClause;
-import org.apache.camel.component.bean.BeanConverterLoader;
 import org.apache.camel.component.file.strategy.GenericFileProcessStrategyFactory;
+import org.apache.camel.graalvm.Application;
 import org.apache.camel.model.FromDefinition;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
@@ -59,6 +61,8 @@ public class CamelFeature implements Feature {
             finder.findImplementations(Consumer.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(Producer.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(Endpoint.class).forEach(CamelFeature::allowAll);
+            finder.findImplementations(Exchange.class).forEach(CamelFeature::allowAll);
+            finder.findImplementations(Message.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ProcessorDefinition.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ExchangeFormatter.class).forEach(CamelFeature::allowAll);
             finder.findImplementations(ExpressionDefinition.class).forEach(CamelFeature::allowAll);
@@ -75,7 +79,7 @@ public class CamelFeature implements Feature {
             allowAll(LanguageExpression.class);
             allowAll(ExpressionBuilder.class);
             allowAll(ExpressionClause.class);
-            allowAll(BeanConverterLoader.class);
+            allowAll(Application.DSL.class);
         } catch (Throwable t) {
             throw new RuntimeException("Unable to analyse classes", t);
         }

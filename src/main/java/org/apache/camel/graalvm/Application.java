@@ -1,13 +1,14 @@
 package org.apache.camel.graalvm;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.camel.builder.BuilderSupport;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.main.Main;
+import org.apache.camel.model.RouteDefinition;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
 
 public class Application {
     public static void main(String[] args) throws Exception {
@@ -16,34 +17,35 @@ public class Application {
         main.run();
     }
 
-    // ***********************
-    //
-    // Routes
-    //
-    // ***********************
-
     private static class Routes extends RouteBuilder {
         private final Path path;
+        private final Context context;
 
         public Routes(Path path) {
             this.path = path;
+            this.context = Context.newBuilder("js").allowAllAccess(true).build();
         }
 
         @Override
         public void configure() throws Exception {
-            try(Context ctx = Context.newBuilder("js").allowAllAccess(true).build()) {
-                ctx.getBindings("js").putMember("from", (ProxyExecutable) arguments -> {
-                    if (arguments.length != 1) {
-                        throw new IllegalArgumentException("");
-                    }
+            final DSL dsl = new DSL(this);
+            final byte[] content = Files.readAllBytes(path);
 
-                    return from(arguments[0].asString());
-                });
+            this.context.getBindings("js").putMember("__dsl", dsl);
+            this.context.eval("js", "with (__dsl) { " + new String(content) + "}");
+        }
+    }
 
-                ctx.eval(
-                    Source.newBuilder("js", path.toFile()).build()
-                );
-            }
+
+    public static class DSL extends BuilderSupport {
+        private RouteBuilder builder;
+
+        public DSL(RouteBuilder builder) {
+            this.builder = builder;
+        }
+
+        public RouteDefinition from(String uri) {
+            return builder.from(uri);
         }
     }
 }
